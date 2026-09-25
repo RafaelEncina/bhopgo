@@ -382,8 +382,13 @@
     }
 
     @keyframes marquee {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
     }
 
     #songSelect {
@@ -639,51 +644,55 @@
   </div>
   <div id="menu">
     <div class="menu-row">
-    <div id="acctPanel">
-      <h2>Cuenta</h2>
-      <p class="acct-desc">Crea una cuenta para guardar tu progreso, estrellas y cuchillos desbloqueados en la nube.</p>
-      <input id="uName" placeholder="Usuario">
-      <input id="uPass" placeholder="Contraseña" type="password">
-      <div class="acct-btns">
-        <button id="btnLogin">Iniciar sesión</button>
-        <button id="btnRegister">Crear cuenta</button>
-        <button id="btnLogout" hidden>Cerrar sesión</button>
+      <div id="acctPanel">
+        <h2>Cuenta</h2>
+        <p class="acct-desc">Crea una cuenta para guardar tu progreso, estrellas y cuchillos desbloqueados en la nube.
+        </p>
+        <input id="uName" placeholder="Usuario">
+        <input id="uPass" placeholder="Contraseña" type="password">
+        <div class="acct-btns">
+          <button id="btnLogin">Iniciar sesión</button>
+          <button id="btnRegister">Crear cuenta</button>
+          <button id="btnLogout" hidden>Cerrar sesión</button>
+        </div>
+        <p class="mut small" id="acctMsg"></p>
       </div>
-      <p class="mut small" id="acctMsg"></p>
-    </div>
-    <div class="card">
-      <h1>BHOP Go</h1>
-      <p id="msg" class="mut">Salta de bloque en bloque sin caer. Gira el mouse mientras avanzas en diagonal para ganar
-        velocidad.</p>
-      <h2>Dificultad</h2>
-      <div class="opts" id="diffs"></div>
-      <p class="mut small" id="starTotals"></p>
-      <h2>Mapa</h2>
-      <div class="opts" id="maps"></div>
-      <p id="mdesc" class="mut small"></p>
-      <p class="small" id="lastNote" style="color:var(--acc);font-weight:700"></p>
-      <h2>Cuchillo</h2>
-      <div class="opts" id="knives"></div>
-      <h2>Opciones</h2>
-      <label><input type="checkbox" id="auto" checked> Auto-bhop (mantener espacio)</label>
-      <label><input type="checkbox" id="autoJump"> Auto-jump (saltar siempre)</label>
-      <label>Sensibilidad <input type="range" id="sens" min="0.4" max="3" step="0.1" value="1"></label>
-      <label>Volumen música <input type="range" id="vol" min="0" max="1" step="0.01" value="0.2"> <span
-          id="volVal">20%</span> <button id="btnMute">Mutear</button></label>
-      <p class="mut" id="best"></p>
-      <div class="row"><button id="resume" hidden>Continuar</button><button id="play" class="pri">Jugar</button></div>
-      <p class="mut small">W A S D mover · Espacio saltar (o rueda) · Shift o C agacharse · Clic izq. acuchillar · F
-        inspeccionar · Q cambiar cuchillo · R reiniciar nivel · Esc menú</p>
-    </div>
-    <div class="right-col" id="rightCol">
-      <div id="lbPanel">
-        <h2>🏆 Clasificación</h2>
-        <p class="mut small" id="lbMapName"></p>
-        <div id="lbBody"><p class="mut small">Cargando...</p></div>
+      <div class="card">
+        <h1>BHOP Go</h1>
+        <p id="msg" class="mut">Salta de bloque en bloque sin caer. Gira el mouse mientras avanzas en diagonal para
+          ganar
+          velocidad.</p>
+        <h2>Dificultad</h2>
+        <div class="opts" id="diffs"></div>
+        <p class="mut small" id="starTotals"></p>
+        <h2>Mapa</h2>
+        <div class="opts" id="maps"></div>
+        <p id="mdesc" class="mut small"></p>
+        <p class="small" id="lastNote" style="color:var(--acc);font-weight:700"></p>
+        <h2>Cuchillo</h2>
+        <div class="opts" id="knives"></div>
+        <h2>Opciones</h2>
+        <label><input type="checkbox" id="auto" checked> Auto-bhop (mantener espacio)</label>
+        <label><input type="checkbox" id="autoJump"> Auto-jump (saltar siempre)</label>
+        <label>Sensibilidad <input type="range" id="sens" min="0.4" max="3" step="0.1" value="1"></label>
+        <label>Volumen música <input type="range" id="vol" min="0" max="1" step="0.01" value="0.2"> <span
+            id="volVal">20%</span> <button id="btnMute">Mutear</button></label>
+        <p class="mut" id="best"></p>
+        <div class="row"><button id="resume" hidden>Continuar</button><button id="play" class="pri">Jugar</button></div>
+        <p class="mut small">W A S D mover · Espacio saltar (o rueda) · Shift o C agacharse · Clic izq. acuchillar · F
+          inspeccionar · Q cambiar cuchillo · R reiniciar nivel · Esc menú</p>
+      </div>
+      <div class="right-col" id="rightCol">
+        <div id="lbPanel">
+          <h2>🏆 Clasificación</h2>
+          <p class="mut small" id="lbMapName"></p>
+          <div id="lbBody">
+            <p class="mut small">Cargando...</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
   <div id="win" class="ov"></div>
   <div id="case" class="ov"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -721,8 +730,8 @@
         },
         m2: {
           df: 'medio', n: 'Torre', d: 'Sube en espiral con giros y baja al final.', s: [
-            ['s', 50, 256, 192, 0, 0, 'K'], ['b', 100, 96, 96, 16], ['b', 110, 96, 96, 16], TR, ['b', 100, 96, 96, 16], ['b', 110, 96, 96, 16], CK, TR,
-            ['b', 100, 96, 96, 16], ['b', 110, 96, 96, 16], TR, ['b', 100, 96, 96, 16], ['s', 80, 320, 192, 0, 0, 'KP'],
+            ['s', 50, 256, 192, 0, 0,], ['b', 100, 96, 96, 16], ['b', 110, 96, 96, 16], TR, ['b', 100, 96, 96, 16], ['b', 110, 96, 96, 16], CK, TR,
+            ['b', 100, 96, 96, 16], ['b', 110, 96, 96, 16], TR, ['b', 100, 96, 96, 16], ['s', 80, 320, 250, 0, 0, 'KP'],
             ['b', 130, 88, 88, -24], ['b', 140, 88, 88, -24], ['b', 150, 88, 88], E]
         },
         m3: {
@@ -1142,7 +1151,7 @@
         }
       }
       function submitScore(map, t) {
-        api('leaderboard', { method: 'POST', body: JSON.stringify({ map, time: t }) }).catch(() => {});
+        api('leaderboard', { method: 'POST', body: JSON.stringify({ map, time: t }) }).catch(() => { });
       }
       // --- Música
       const SONGS = ['Disco Night.mp3', 'Midnight.mp3', 'Summertime.mp3'];
