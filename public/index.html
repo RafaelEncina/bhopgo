@@ -356,6 +356,8 @@
       <p class="mut small" id="acctMsg"></p>
       <h2>Opciones</h2>
       <label><input type="checkbox" id="auto" checked> Auto-bhop (mantener espacio)</label>
+      <label><input type="checkbox" id="autoJump"> Auto-jump (saltar siempre)</label>
+      <label><input type="checkbox" id="autoRun"> Auto-run (avanzar siempre)</label>
       <label>Sensibilidad <input type="range" id="sens" min="0.4" max="3" step="0.1" value="1"></label>
       <p class="mut" id="best"></p>
       <div class="row"><button id="resume" hidden>Continuar</button><button id="play" class="pri">Jugar</button></div>
@@ -465,7 +467,7 @@
             ['b', 150, 64, 64, 32], ['b', 160, 64, 64, 32, 35], ['b', 160, 64, 64, -32, -35], ['b', 170, 64, 64, -32], TR, ['b', 150, 64, 64, 32, 30], ['b', 160, 64, 64, -32, -30], E]
         }
       };
-      const sel = { m: 'e1', d: 'facil', a: true, k: 'bay' };
+      const sel = { m: 'e1', d: 'facil', a: true, ar: false, aj: false, k: 'bay' };
       const PK = 'bhop:prog'; let prog = { s: {} };
       try { prog = JSON.parse(localStorage.getItem(PK)) || prog } catch (e) { }
       if (!prog.s) prog.s = {};
@@ -615,12 +617,14 @@
           else if (!hit(72, P.y - 18)) { P.y -= 18; vo += 18; P.d = false; H = 72 }
           else if (!hit(72, P.y)) { P.d = false; H = 72 }
         }
-        const fw = (K.KeyW || K.ArrowUp ? 1 : 0) - (K.KeyS || K.ArrowDown ? 1 : 0), st = (K.KeyD || K.ArrowRight ? 1 : 0) - (K.KeyA || K.ArrowLeft ? 1 : 0);
+        const isW = sel.ar || K.KeyW || K.ArrowUp;
+        const fw = (isW ? 1 : 0) - (K.KeyS || K.ArrowDown ? 1 : 0), st = (K.KeyD || K.ArrowRight ? 1 : 0) - (K.KeyA || K.ArrowLeft ? 1 : 0);
         const sy = Math.sin(yaw), cy = Math.cos(yaw);
         let wx = -sy * fw + cy * st, wz = -cy * fw - sy * st; const wl = Math.hypot(wx, wz);
         if (wl > 0) { wx /= wl; wz /= wl }
-        const ws = wl > 0 ? (P.d && P.g ? 85 : 250) : 0, want = sel.a ? K.Space : jq > 0;
-        if (!running && (wl > 0 || K.Space || jq > 0)) running = true;
+        const want = sel.aj || (sel.a ? K.Space : jq > 0);
+        const ws = wl > 0 ? (P.d && P.g ? 85 : 250) : 0;
+        if (!running && (wl > 0 || want)) running = true;
         const accel = (a, air) => { if (!ws) return; const cap = air ? Math.min(ws, 30) : ws, add = cap - (P.vx * wx + P.vz * wz); if (add <= 0) return; const as = Math.min(a * ws * dt, add); P.vx += wx * as; P.vz += wz * as };
         if (P.g && want) { P.vy = 302; P.g = false; jumps++ }
         else if (P.g) { const sp = Math.hypot(P.vx, P.vz); if (sp > .1) { const n = Math.max(sp - Math.max(sp, 100) * 4 * dt, 0) / sp; P.vx *= n; P.vz *= n } }
@@ -687,7 +691,10 @@
         setTimeout(() => { el.classList.remove('show'); cb() }, 2300);
       }
       function openCase(kid, cb) {
-        const pick = rollRarity(); prog.r[kid] = pick[0]; save();
+        const pick = rollRarity();
+        const curIdx = prog.r[kid] ? RARS.findIndex(x => x[0] === prog.r[kid]) : -1;
+        const newIdx = RARS.findIndex(x => x[0] === pick[0]);
+        if (newIdx > curIdx) { prog.r[kid] = pick[0]; save(); }
         const el = $('case'), N = 32, win = 26;
         let items = '';
         for (let i = 0; i < N; i++) { const rr = i === win ? pick : RARS[Math.floor(Math.random() * RARS.length)]; items += '<div class="reel-item ' + rr[3] + '">' + KN[kid].n + '<br><span class="rar-tag">' + rr[1] + '</span></div>' }
@@ -726,6 +733,8 @@
       }
       function lock() { try { cv.requestPointerLock() } catch (e) { } setTimeout(() => { if (!document.pointerLockElement && state === 'play') drag = true }, 400) }
       $('auto').onchange = e => sel.a = e.target.checked;
+      $('autoJump').onchange = e => sel.aj = e.target.checked;
+      $('autoRun').onchange = e => sel.ar = e.target.checked;
       $('play').onclick = () => { build(); closeMenu(); lock() };
       $('resume').onclick = () => { closeMenu(); lock() };
       ui(); build();
