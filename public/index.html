@@ -359,7 +359,7 @@
       <label>Sensibilidad <input type="range" id="sens" min="0.4" max="3" step="0.1" value="1"></label>
       <p class="mut" id="best"></p>
       <div class="row"><button id="resume" hidden>Continuar</button><button id="play" class="pri">Jugar</button></div>
-      <p class="mut small">W A S D mover · Espacio saltar (o rueda) · Ctrl o C agacharse · Clic izq. acuchillar · F
+      <p class="mut small">W A S D mover · Espacio saltar (o rueda) · Shift o C agacharse · Clic izq. acuchillar · F
         inspeccionar · Q cambiar cuchillo · R reiniciar nivel · Esc menú</p>
     </div>
   </div>
@@ -736,7 +736,7 @@
       });
       addEventListener('wheel', e => { if (state === 'play') { jq = 3; e.preventDefault() } }, { passive: false });
       addEventListener('keydown', e => {
-        if (state === 'play' && (e.ctrlKey || ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code))) e.preventDefault();
+        if (state === 'play' && (e.shiftKey || ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code))) e.preventDefault();
         if (!K[e.code] && e.code === 'Space') jq = 3;
         K[e.code] = true;
         if (state !== 'play') return;
