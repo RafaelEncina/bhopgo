@@ -607,7 +607,7 @@
       function overlap(b) { return b.solid && P.x + HW > b.x0 && P.x - HW < b.x1 && P.z + HW > b.z0 && P.z - HW < b.z1 && P.y + H > b.y0 && P.y < b.y1 }
       function respawn() { P.x = cp.x; P.y = cp.y; P.z = cp.z; P.vx = P.vy = P.vz = 0; P.g = false }
       function tick(dt) {
-        const cw = K.ControlLeft || K.ControlRight || K.KeyC;
+        const cw = K.ShiftLeft || K.KeyC;
         const hit = (h, y) => { const oh = H, oy = P.y; H = h; P.y = y; const r = blocks.some(overlap); H = oh; P.y = oy; return r };
         if (cw && !P.d) { P.d = true; if (!P.g && !hit(54, P.y + 18)) { P.y += 18; vo -= 18 } H = 54 }
         else if (!cw && P.d) {
