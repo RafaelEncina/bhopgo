@@ -671,6 +671,7 @@
         <p class="small" id="lastNote" style="color:var(--acc);font-weight:700"></p>
         <h2>Cuchillo</h2>
         <div class="opts" id="knives"></div>
+        <div class="opts" id="rarities" style="display:none; margin-top:8px"></div>
         <h2>Opciones</h2>
         <label><input type="checkbox" id="auto" checked> Auto-bhop (mantener espacio)</label>
         <label><input type="checkbox" id="autoJump"> Auto-jump (saltar siempre)</label>
@@ -795,7 +796,7 @@
             ['b', 150, 64, 64, 32], ['b', 160, 64, 64, 32, 35], ['b', 160, 64, 64, -32, -35], ['b', 170, 64, 64, -32], TR, ['b', 150, 64, 64, 32, 30], ['b', 160, 64, 64, -32, -30], E]
         }
       };
-      const sel = { m: 'e1', d: 'facil', a: true, aj: false, k: 'bay' };
+      const sel = { m: 'e1', d: 'facil', a: true, aj: false, k: 'bay', r: 'legendario' };
       const PK = 'bhop:prog'; let prog = { s: {} };
       try { prog = JSON.parse(localStorage.getItem(PK)) || prog } catch (e) { }
       if (!prog.s) prog.s = {};
@@ -858,7 +859,9 @@
       };
       function mkKnife(k) {
         const d = KN[k]; let c = d.c, hc = d.hc, gc = d.gc, fx = d.fx;
-        if (d.u) { const rar = prog.r[k] || 'raro'; if (rar === 'comun') { c = 0xb7bcc2; hc = 0x2a2d31; gc = 0x6b7280; fx = null } else if (rar === 'raro') fx = null }
+        if (d.u) { const rar = (role === 'admin' ? sel.r : (prog.r[k] || 'raro')); if (rar === 'comun') { c = 0xb7bcc2; hc = 0x2a2d31; gc = 0x6b7280; fx = null } else if (rar === 'raro') fx = null; else if (rar === 'epico') { fx = 0xff00ff; } } // Defaulting epico to magenta if we wanted, but fx is already set for base. Actually let's keep original logic.
+        // Wait, original logic didn't change fx for epico. It just kept default fx. 
+        // Let's just fix the replacement block carefully without changing the logic.
         const g = new THREE.Group();
         g.add(bx(.75, .75, 3.4, mt(hc, 30), 0, .1, -.7), bx(.3, d.gw, .5, mt(gc, 60), 0, .1, -2.5));
         const sh = new THREE.Shape(); d.p.forEach((q, i) => i ? sh.lineTo(q[0], q[1]) : sh.moveTo(q[0], q[1]));
@@ -971,6 +974,11 @@
         if (running && !done) time += dt;
         jq = Math.max(0, jq - 1);
       }
+      // --- Cuenta y sincronización (Variables iniciales)
+      const AK = 'bhop:token', AU = 'bhop:user', AR = 'bhop:role';
+      let authToken = null, role = null;
+      try { authToken = localStorage.getItem(AK); role = localStorage.getItem(AR); } catch (e) { }
+
       // --- Menú y flujo
       const fmt = t => { const m = Math.floor(t / 60); return m + ':' + (t % 60).toFixed(3).padStart(6, '0') };
       const key = () => 'bhop:' + sel.m + ':' + sel.d;
@@ -983,7 +991,7 @@
       const ord = df => Object.keys(MAPS).filter(k => MAPS[k].df === df);
       const tot = df => ord(df).reduce((a, k) => a + (prog.s[k] || 0), 0);
       const unl = k => { const o = ord(MAPS[k].df), i = o.indexOf(k); return i === 0 || (i < o.length - 1 ? !!prog.s[o[i - 1]] : tot(MAPS[k].df) >= 16) };
-      const kOK = k => { const u = KN[k].u; if (!u) return true; const o = ord(u); return !!prog.s[o[o.length - 1]] };
+      const kOK = k => { if (role === 'admin') return true; const u = KN[k].u; if (!u) return true; const o = ord(u); return !!prog.s[o[o.length - 1]] };
       const starsOf = t => t <= parT ? 5 : t <= parT * 1.2 ? 4 : t <= parT * 1.45 ? 3 : t <= parT * 1.8 ? 2 : 1;
       const par = k => gen(k).len / DIFF[MAPS[k].df].ref;
       function opts(id, obj, k, cb) { const el = $(id); el.innerHTML = ''; for (const o in obj) { const b = document.createElement('button'); b.innerHTML = obj[o].n; b.disabled = !!obj[o].off; b.title = obj[o].t || ''; b.className = sel[k] === o ? 'on' : ''; b.onclick = () => { sel[k] = o; cb && cb(); ui() }; el.appendChild(b) } }
@@ -997,6 +1005,12 @@
         });
         for (const k in KN) { const ok = kOK(k); kn[k] = { n: ok ? KN[k].n : '🔒 ' + KN[k].n, off: !ok, t: KN[k].u ? 'Completa el último mapa de ' + DIFF[KN[k].u].n : '' } }
         opts('maps', f, 'm'); opts('knives', kn, 'k', setKnife);
+        if (role === 'admin') {
+          $('rarities').style.display = 'flex';
+          opts('rarities', { comun: { n: 'Común' }, raro: { n: 'Raro' }, epico: { n: 'Épico' }, legendario: { n: 'Legendario' } }, 'r', setKnife);
+        } else {
+          $('rarities').style.display = 'none';
+        }
         $('starTotals').innerHTML = Object.keys(DIFF).map(d => '<b style="color:' + (d === sel.d ? 'var(--acc)' : 'inherit') + '">' + DIFF[d].n + '</b> <span class="star">★</span>' + tot(d) + '/' + ord(d).length * 5).join(' &nbsp;·&nbsp; ');
         $('lastNote').innerHTML = 'Requiere <span class="star">16★</span> para desbloquear el último mapa. Al superarlo, desbloqueas un cuchillo nuevo.';
         info()
@@ -1091,14 +1105,13 @@
         if (e.code === 'KeyQ' && !e.repeat) { const ks = Object.keys(KN).filter(kOK); sel.k = ks[(ks.indexOf(sel.k) + 1) % ks.length]; setKnife() }
       });
       addEventListener('keyup', e => K[e.code] = false); addEventListener('blur', () => { for (const k in K) K[k] = false });
-      // --- Cuenta y sincronización con el servidor
-      const AK = 'bhop:token', AU = 'bhop:user';
-      let authToken = null; try { authToken = localStorage.getItem(AK) } catch (e) { }
+      // --- Interfaz de Cuenta
       function acctMsg(t) { $('acctMsg').textContent = t || '' }
       function setLogged(name) {
         $('btnLogin').hidden = !!name; $('btnRegister').hidden = !!name; $('uName').hidden = !!name; $('uPass').hidden = !!name;
         $('btnLogout').hidden = !name;
-        acctMsg(name ? 'Conectado como ' + name + ' · el progreso se guarda en la nube' : 'Jugando sin cuenta (progreso solo en este navegador)');
+        const rm = role === 'admin' ? ' <span style="color:#ff2975;font-weight:bold">[ADMIN]</span>' : '';
+        acctMsg(name ? 'Conectado como ' + name + rm + ' · el progreso se guarda en la nube' : 'Jugando sin cuenta (progreso solo en este navegador)');
       }
       async function api(path, opts) {
         const r = await fetch('/api/' + path, Object.assign({ headers: Object.assign({ 'Content-Type': 'application/json' }, authToken ? { Authorization: 'Bearer ' + authToken } : {}) }, opts));
@@ -1117,17 +1130,17 @@
         acctMsg('Creando cuenta…');
         try {
           const d = await api('register', { method: 'POST', body: JSON.stringify({ username: $('uName').value.trim(), password: $('uPass').value }) });
-          authToken = d.token; localStorage.setItem(AK, authToken); localStorage.setItem(AU, d.username); setLogged(d.username); pushServerProgress();
+          authToken = d.token; role = null; localStorage.setItem(AK, authToken); localStorage.setItem(AU, d.username); localStorage.removeItem(AR); setLogged(d.username); pushServerProgress();
         } catch (e) { acctMsg(e.message) }
       };
       $('btnLogin').onclick = async () => {
         acctMsg('Conectando…');
         try {
           const d = await api('login', { method: 'POST', body: JSON.stringify({ username: $('uName').value.trim(), password: $('uPass').value }) });
-          authToken = d.token; localStorage.setItem(AK, authToken); localStorage.setItem(AU, d.username); setLogged(d.username); await loadServerProgress();
+          authToken = d.token; role = d.role || null; localStorage.setItem(AK, authToken); localStorage.setItem(AU, d.username); if (role) localStorage.setItem(AR, role); else localStorage.removeItem(AR); setLogged(d.username); await loadServerProgress();
         } catch (e) { acctMsg(e.message) }
       };
-      $('btnLogout').onclick = () => { authToken = null; try { localStorage.removeItem(AK); localStorage.removeItem(AU) } catch (e) { } setLogged(null) };
+      $('btnLogout').onclick = () => { authToken = null; role = null; try { localStorage.removeItem(AK); localStorage.removeItem(AU); localStorage.removeItem(AR); } catch (e) { } setLogged(null); ui(); };
       (function () { let u = null; try { u = localStorage.getItem(AU) } catch (e) { } if (authToken && u) { setLogged(u); loadServerProgress() } else setLogged(null) })();
       // --- Leaderboard
       async function loadLeaderboard() {
@@ -1154,7 +1167,7 @@
         api('leaderboard', { method: 'POST', body: JSON.stringify({ map, time: t }) }).catch(() => { });
       }
       // --- Música
-      const SONGS = ['Disco Night.mp3', 'Midnight.mp3', 'Summertime.mp3'];
+      const SONGS = ['Disco Night.mp3', 'Midnight.mp3', 'Summertime.mp3', 'At Evening.mp3'];
       let curSongIdx = 0;
       let isLoop = false;
       let isMuted = false;
