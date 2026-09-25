@@ -5,6 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>BHOP Go</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f3f4f6;
@@ -95,12 +98,20 @@
       padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px)
     }
 
+    .menu-row {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 14px;
+      max-height: 100%;
+    }
+
     .card {
       background: var(--card);
       border: 1px solid var(--bd);
       border-radius: 14px;
       padding: 20px 24px;
-      max-width: 460px;
+      max-width: 640px;
       width: 100%;
       max-height: 100%;
       overflow-y: auto;
@@ -320,6 +331,287 @@
     .rar-tag {
       font-weight: 700
     }
+
+    #musicPlayer {
+      position: fixed;
+      right: 14px;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      background: linear-gradient(135deg, #0d0221ee, #150535ee, #1a0a3eee);
+      border: 1px solid #ff2975;
+      border-radius: 16px;
+      padding: 18px;
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 280px;
+      box-shadow: 0 0 15px #ff297544, 0 0 40px #7b2ff744, inset 0 0 20px #0008;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    #musicPlayer .mp-title {
+      font-weight: 900;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, #ff2975, #f5c518, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+
+    .mp-now {
+      overflow: hidden;
+      white-space: nowrap;
+      background: #0a011a;
+      border-radius: 8px;
+      border: 1px solid #7b2ff733;
+      padding: 6px 10px;
+    }
+
+    .mp-now .mp-scroll {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 10s linear infinite;
+      font-size: 13px;
+      font-weight: 700;
+      color: #00f0ff;
+      text-shadow: 0 0 8px #00f0ff88;
+    }
+
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    #songSelect {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid #7b2ff7;
+      background: #150535;
+      color: #f0e0ff;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #songSelect:focus {
+      border-color: #ff2975;
+      box-shadow: 0 0 8px #ff297566;
+    }
+
+    .viz {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      height: 52px;
+      padding: 8px 0;
+      background: #0a011a;
+      border-radius: 8px;
+      border: 1px solid #7b2ff733;
+    }
+
+    .viz .bar {
+      width: 10px;
+      background: linear-gradient(to top, #ff2975, #f5c518);
+      height: 15%;
+      border-radius: 3px;
+      transition: height 0.12s;
+      box-shadow: 0 0 6px #ff297588;
+    }
+
+    .viz.playing .bar {
+      animation: bounce 0.45s infinite alternate ease-in-out;
+    }
+
+    .viz.playing .bar:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+
+    .viz.playing .bar:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    .viz.playing .bar:nth-child(4) {
+      animation-delay: 0.05s;
+    }
+
+    .viz.playing .bar:nth-child(5) {
+      animation-delay: 0.28s;
+    }
+
+    .viz.playing .bar:nth-child(6) {
+      animation-delay: 0.12s;
+    }
+
+    .viz.playing .bar:nth-child(7) {
+      animation-delay: 0.35s;
+    }
+
+    .viz.playing .bar:nth-child(8) {
+      animation-delay: 0.18s;
+    }
+
+    @keyframes bounce {
+      0% {
+        height: 15%;
+      }
+
+      100% {
+        height: 100%;
+      }
+    }
+
+    #musicPlayer .mp-loop {
+      font-size: 10px;
+      color: #b388ff;
+      text-align: center;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+
+    #musicPlayer .mp-loop span {
+      color: #00f0ff;
+      font-weight: 700;
+    }
+
+    #musicPlayer .mp-expand {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 200px;
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.3s ease;
+      opacity: 1;
+    }
+
+    #musicPlayer.collapsed .mp-expand {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    #musicPlayer.collapsed {
+      width: 200px;
+      padding: 12px;
+      gap: 8px;
+    }
+
+    #musicPlayer.collapsed .mp-title {
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+
+    #musicPlayer:not(.collapsed) {
+      position: static;
+      width: 100%;
+      box-sizing: border-box;
+      top: auto;
+      bottom: auto;
+      right: auto;
+    }
+
+    #musicPlayer {
+      transition: width 0.35s ease, padding 0.35s ease, gap 0.35s ease;
+    }
+
+    #acctPanel {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      padding: 16px;
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 250px;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    #acctPanel h2 {
+      margin: 0 0 4px;
+    }
+
+    #acctPanel .acct-desc {
+      font-size: 11px;
+      color: var(--mut);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    #acctPanel input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--fg);
+      font: inherit;
+    }
+
+    #acctPanel .acct-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    #lbPanel {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      padding: 16px;
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      box-sizing: border-box;
+      max-height: 100%;
+      overflow-y: auto;
+    }
+
+    #lbPanel h2 {
+      margin: 0 0 4px;
+    }
+
+    #lbPanel table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    #lbPanel th {
+      text-align: left;
+      color: var(--mut);
+      font-weight: 600;
+      border-bottom: 1px solid var(--bd);
+      padding: 4px 2px;
+    }
+
+    #lbPanel td {
+      padding: 4px 2px;
+      border-bottom: 1px solid var(--bd);
+    }
+
+    #lbPanel .lb-rank {
+      color: var(--acc);
+      font-weight: 700;
+    }
   </style>
 </head>
 
@@ -327,7 +619,38 @@
   <canvas id="cv"></canvas>
   <div id="dot"></div>
   <div id="hud"></div>
+  <div id="musicPlayer" class="collapsed">
+    <div class="mp-title">♫ Música</div>
+    <div class="mp-now"><span class="mp-scroll" id="nowPlaying"></span></div>
+    <div id="mpViz" class="viz">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+    <div class="mp-expand">
+      <select id="songSelect"></select>
+      <p class="mp-loop">Presiona <span>L</span> para loop <span id="loopStatus"></span></p>
+    </div>
+  </div>
   <div id="menu">
+    <div class="menu-row">
+    <div id="acctPanel">
+      <h2>Cuenta</h2>
+      <p class="acct-desc">Crea una cuenta para guardar tu progreso, estrellas y cuchillos desbloqueados en la nube.</p>
+      <input id="uName" placeholder="Usuario">
+      <input id="uPass" placeholder="Contraseña" type="password">
+      <div class="acct-btns">
+        <button id="btnLogin">Iniciar sesión</button>
+        <button id="btnRegister">Crear cuenta</button>
+        <button id="btnLogout" hidden>Cerrar sesión</button>
+      </div>
+      <p class="mut small" id="acctMsg"></p>
+    </div>
     <div class="card">
       <h1>BHOP Go</h1>
       <p id="msg" class="mut">Salta de bloque en bloque sin caer. Gira el mouse mientras avanzas en diagonal para ganar
@@ -341,29 +664,26 @@
       <p class="small" id="lastNote" style="color:var(--acc);font-weight:700"></p>
       <h2>Cuchillo</h2>
       <div class="opts" id="knives"></div>
-      <h2>Cuenta</h2>
-      <div class="opts" id="acctForm">
-        <input id="uName" placeholder="usuario"
-          style="flex:1;min-width:100px;padding:8px;border:1px solid var(--bd);border-radius:8px;background:transparent;color:var(--fg)">
-        <input id="uPass" placeholder="contraseña" type="password"
-          style="flex:1;min-width:100px;padding:8px;border:1px solid var(--bd);border-radius:8px;background:transparent;color:var(--fg)">
-      </div>
-      <div class="row">
-        <button id="btnLogin">Iniciar sesión</button>
-        <button id="btnRegister">Crear cuenta</button>
-        <button id="btnLogout" hidden>Cerrar sesión</button>
-      </div>
-      <p class="mut small" id="acctMsg"></p>
       <h2>Opciones</h2>
       <label><input type="checkbox" id="auto" checked> Auto-bhop (mantener espacio)</label>
       <label><input type="checkbox" id="autoJump"> Auto-jump (saltar siempre)</label>
       <label>Sensibilidad <input type="range" id="sens" min="0.4" max="3" step="0.1" value="1"></label>
+      <label>Volumen música <input type="range" id="vol" min="0" max="1" step="0.01" value="0.2"> <span
+          id="volVal">20%</span> <button id="btnMute">Mutear</button></label>
       <p class="mut" id="best"></p>
       <div class="row"><button id="resume" hidden>Continuar</button><button id="play" class="pri">Jugar</button></div>
       <p class="mut small">W A S D mover · Espacio saltar (o rueda) · Shift o C agacharse · Clic izq. acuchillar · F
         inspeccionar · Q cambiar cuchillo · R reiniciar nivel · Esc menú</p>
     </div>
+    <div class="right-col" id="rightCol">
+      <div id="lbPanel">
+        <h2>🏆 Clasificación</h2>
+        <p class="mut small" id="lbMapName"></p>
+        <div id="lbBody"><p class="mut small">Cargando...</p></div>
+      </div>
+    </div>
   </div>
+</div>
   <div id="win" class="ov"></div>
   <div id="case" class="ov"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -673,8 +993,8 @@
         info()
       }
       const defaultMsg = $('msg').textContent;
-      function openMenu(msg) { state = 'menu'; $('menu').style.display = 'flex'; $('resume').hidden = true; if (msg) $('msg').textContent = msg; ui(); if (document.pointerLockElement) document.exitPointerLock() }
-      function closeMenu() { $('menu').style.display = 'none'; state = 'play' }
+      function openMenu(msg) { state = 'menu'; $('menu').style.display = 'flex'; $('resume').hidden = true; if (msg) $('msg').textContent = msg; ui(); if (document.pointerLockElement) document.exitPointerLock(); $('rightCol').appendChild($('musicPlayer')); $('musicPlayer').classList.remove('collapsed'); loadLeaderboard() }
+      function closeMenu() { $('menu').style.display = 'none'; state = 'play'; document.body.appendChild($('musicPlayer')); $('musicPlayer').classList.add('collapsed') }
       function pause() { if (state !== 'play') return; openMenu('Pausa'); $('resume').hidden = false }
       const RARS = [['comun', 'Común', .65, 'rar-common'], ['raro', 'Raro', .20, 'rar-rare'], ['epico', 'Épico', .10, 'rar-epic'], ['legendario', 'Legendario', .05, 'rar-legendary']];
       function rollRarity() { let r = Math.random(), acc = 0; for (const x of RARS) { acc += x[2]; if (r <= acc) return x } return RARS[0] }
@@ -717,6 +1037,7 @@
         if (document.pointerLockElement) document.exitPointerLock();
         const b = getBest(), st = starsOf(time), df = MAPS[sel.m].df, o = ord(df), i = o.indexOf(sel.m), was = prog.s[sel.m] || 0, before = o.map(unl), isRec = !b || time < b;
         if (isRec) { try { localStorage.setItem(key(), time) } catch (e) { } }
+        if (authToken) submitScore(sel.m, time);
         prog.s[sel.m] = Math.max(was, st); save();
         const nw = o.filter((k, j) => !before[j] && unl(k)).map(k => MAPS[k].n), nk = Object.keys(KN).find(kk => KN[kk].u === df);
         let extra = 'Caídas ' + falls + ' · Saltos ' + jumps;
@@ -732,7 +1053,10 @@
       function lock() { try { cv.requestPointerLock() } catch (e) { } setTimeout(() => { if (!document.pointerLockElement && state === 'play') drag = true }, 400) }
       $('auto').onchange = e => sel.a = e.target.checked;
       $('autoJump').onchange = e => sel.aj = e.target.checked;
-      $('play').onclick = () => { build(); closeMenu(); lock() };
+      $('play').onclick = () => {
+        build(); closeMenu(); lock();
+        if (bgm.paused && bgm.src) bgm.play().catch(() => { });
+      };
       $('resume').onclick = () => { closeMenu(); lock() };
       ui(); build();
       document.addEventListener('pointerlockchange', () => { if (document.pointerLockElement === cv) drag = false; else if (state === 'play' && !drag) pause() });
@@ -744,6 +1068,10 @@
       });
       addEventListener('wheel', e => { if (state === 'play') { jq = 3; e.preventDefault() } }, { passive: false });
       addEventListener('keydown', e => {
+        if (e.code === 'KeyL' && document.activeElement.tagName !== 'INPUT') {
+          isLoop = !isLoop;
+          $('loopStatus').textContent = isLoop ? '(ON)' : '';
+        }
         if (state === 'play' && (e.shiftKey || ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code))) e.preventDefault();
         if (!K[e.code] && e.code === 'Space') jq = 3;
         K[e.code] = true;
@@ -792,6 +1120,82 @@
       };
       $('btnLogout').onclick = () => { authToken = null; try { localStorage.removeItem(AK); localStorage.removeItem(AU) } catch (e) { } setLogged(null) };
       (function () { let u = null; try { u = localStorage.getItem(AU) } catch (e) { } if (authToken && u) { setLogged(u); loadServerProgress() } else setLogged(null) })();
+      // --- Leaderboard
+      async function loadLeaderboard() {
+        $('lbMapName').textContent = MAPS[sel.m].n + ' (' + DIFF[MAPS[sel.m].df].n + ')';
+        $('lbBody').innerHTML = '<p class="mut small">Cargando...</p>';
+        try {
+          const d = await api('leaderboard?map=' + sel.m, { method: 'GET' });
+          if (!d.entries || d.entries.length === 0) {
+            $('lbBody').innerHTML = '<p class="mut small">Sin tiempos aún.</p>';
+            return;
+          }
+          let html = '<table><tr><th>#</th><th>Jugador</th><th>Tiempo</th><th>Fecha</th></tr>';
+          d.entries.forEach((e, i) => {
+            const date = new Date(e.created_at).toLocaleDateString();
+            html += '<tr><td class="lb-rank">' + (i + 1) + '</td><td>' + e.username + '</td><td>' + fmt(e.time_seconds) + '</td><td>' + date + '</td></tr>';
+          });
+          html += '</table>';
+          $('lbBody').innerHTML = html;
+        } catch (e) {
+          $('lbBody').innerHTML = '<p class="mut small">Error al cargar.</p>';
+        }
+      }
+      function submitScore(map, t) {
+        api('leaderboard', { method: 'POST', body: JSON.stringify({ map, time: t }) }).catch(() => {});
+      }
+      // --- Música
+      const SONGS = ['Disco Night.mp3', 'Midnight.mp3', 'Summertime.mp3'];
+      let curSongIdx = 0;
+      let isLoop = false;
+      let isMuted = false;
+      const bgm = new Audio();
+      bgm.volume = 0.2;
+
+      function loadSong(idx) {
+        curSongIdx = idx;
+        bgm.src = 'music/' + SONGS[idx];
+        $('songSelect').value = idx;
+        $('nowPlaying').textContent = '\u266b  ' + SONGS[idx].replace('.mp3', '') + '  \u266b  ' + SONGS[idx].replace('.mp3', '') + '  ';
+      }
+
+      bgm.addEventListener('ended', () => {
+        if (!isLoop) loadSong((curSongIdx + 1) % SONGS.length);
+        bgm.play().catch(() => { });
+      });
+
+      bgm.addEventListener('play', () => $('mpViz').classList.add('playing'));
+      bgm.addEventListener('pause', () => $('mpViz').classList.remove('playing'));
+
+      const selSong = $('songSelect');
+      SONGS.forEach((s, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = s.replace('.mp3', '');
+        selSong.appendChild(opt);
+      });
+
+      selSong.onchange = e => {
+        loadSong(parseInt(e.target.value));
+        bgm.play().catch(() => { });
+      };
+
+      $('vol').oninput = e => {
+        bgm.volume = e.target.value;
+        $('volVal').textContent = Math.round(e.target.value * 100) + '%';
+        if (isMuted) toggleMute();
+      };
+
+      function toggleMute() {
+        isMuted = !isMuted;
+        bgm.muted = isMuted;
+        $('btnMute').textContent = isMuted ? 'Desmutear' : 'Mutear';
+        $('btnMute').classList.toggle('on', isMuted);
+      }
+      $('btnMute').onclick = toggleMute;
+
+      loadSong(0);
+
       // --- Bucle
       let last = performance.now(), acc = 0;
       function frame(now) {
