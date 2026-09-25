@@ -708,6 +708,8 @@
       }
       function finish() {
         done = true;
+        state = 'finish';
+        if (document.pointerLockElement) document.exitPointerLock();
         const b = getBest(), st = starsOf(time), df = MAPS[sel.m].df, o = ord(df), i = o.indexOf(sel.m), was = prog.s[sel.m] || 0, before = o.map(unl), isRec = !b || time < b;
         if (isRec) { try { localStorage.setItem(key(), time) } catch (e) { } }
         prog.s[sel.m] = Math.max(was, st); save();
