@@ -357,7 +357,6 @@
       <h2>Opciones</h2>
       <label><input type="checkbox" id="auto" checked> Auto-bhop (mantener espacio)</label>
       <label><input type="checkbox" id="autoJump"> Auto-jump (saltar siempre)</label>
-      <label><input type="checkbox" id="autoRun"> Auto-run (avanzar siempre)</label>
       <label>Sensibilidad <input type="range" id="sens" min="0.4" max="3" step="0.1" value="1"></label>
       <p class="mut" id="best"></p>
       <div class="row"><button id="resume" hidden>Continuar</button><button id="play" class="pri">Jugar</button></div>
@@ -467,7 +466,7 @@
             ['b', 150, 64, 64, 32], ['b', 160, 64, 64, 32, 35], ['b', 160, 64, 64, -32, -35], ['b', 170, 64, 64, -32], TR, ['b', 150, 64, 64, 32, 30], ['b', 160, 64, 64, -32, -30], E]
         }
       };
-      const sel = { m: 'e1', d: 'facil', a: true, ar: false, aj: false, k: 'bay' };
+      const sel = { m: 'e1', d: 'facil', a: true, aj: false, k: 'bay' };
       const PK = 'bhop:prog'; let prog = { s: {} };
       try { prog = JSON.parse(localStorage.getItem(PK)) || prog } catch (e) { }
       if (!prog.s) prog.s = {};
@@ -617,8 +616,7 @@
           else if (!hit(72, P.y - 18)) { P.y -= 18; vo += 18; P.d = false; H = 72 }
           else if (!hit(72, P.y)) { P.d = false; H = 72 }
         }
-        const isW = sel.ar || K.KeyW || K.ArrowUp;
-        const fw = (isW ? 1 : 0) - (K.KeyS || K.ArrowDown ? 1 : 0), st = (K.KeyD || K.ArrowRight ? 1 : 0) - (K.KeyA || K.ArrowLeft ? 1 : 0);
+        const fw = (K.KeyW || K.ArrowUp ? 1 : 0) - (K.KeyS || K.ArrowDown ? 1 : 0), st = (K.KeyD || K.ArrowRight ? 1 : 0) - (K.KeyA || K.ArrowLeft ? 1 : 0);
         const sy = Math.sin(yaw), cy = Math.cos(yaw);
         let wx = -sy * fw + cy * st, wz = -cy * fw - sy * st; const wl = Math.hypot(wx, wz);
         if (wl > 0) { wx /= wl; wz /= wl }
@@ -734,7 +732,6 @@
       function lock() { try { cv.requestPointerLock() } catch (e) { } setTimeout(() => { if (!document.pointerLockElement && state === 'play') drag = true }, 400) }
       $('auto').onchange = e => sel.a = e.target.checked;
       $('autoJump').onchange = e => sel.aj = e.target.checked;
-      $('autoRun').onchange = e => sel.ar = e.target.checked;
       $('play').onclick = () => { build(); closeMenu(); lock() };
       $('resume').onclick = () => { closeMenu(); lock() };
       ui(); build();
