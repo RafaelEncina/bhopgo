@@ -525,7 +525,7 @@
       transition: width 0.35s ease, padding 0.35s ease, gap 0.35s ease;
     }
 
-    #acctPanel {
+    .side-panel {
       background: var(--card);
       border: 1px solid var(--bd);
       border-radius: 14px;
@@ -534,23 +534,22 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      width: 250px;
-      flex-shrink: 0;
-      align-self: center;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    #acctPanel h2 {
+    .side-panel h2 {
       margin: 0 0 4px;
     }
 
-    #acctPanel .acct-desc {
+    .side-panel .acct-desc {
       font-size: 11px;
       color: var(--mut);
       margin: 0;
       line-height: 1.4;
     }
 
-    #acctPanel input {
+    .side-panel input {
       width: 100%;
       box-sizing: border-box;
       padding: 8px;
@@ -561,10 +560,19 @@
       font: inherit;
     }
 
-    #acctPanel .acct-btns {
+    .side-panel .acct-btns {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
+    }
+
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 250px;
+      flex-shrink: 0;
+      align-self: flex-start;
     }
 
     .right-col {
@@ -644,18 +652,24 @@
   </div>
   <div id="menu">
     <div class="menu-row">
-      <div id="acctPanel">
-        <h2>Cuenta</h2>
-        <p class="acct-desc">Crea una cuenta para guardar tu progreso, estrellas y cuchillos desbloqueados en la nube.
-        </p>
-        <input id="uName" placeholder="Usuario">
-        <input id="uPass" placeholder="Contraseña" type="password">
-        <div class="acct-btns">
-          <button id="btnLogin">Iniciar sesión</button>
-          <button id="btnRegister">Crear cuenta</button>
-          <button id="btnLogout" hidden>Cerrar sesión</button>
+      <div class="left-col">
+        <div id="acctPanel" class="side-panel">
+          <h2>Cuenta</h2>
+          <p class="acct-desc">Crea una cuenta para guardar tu progreso, estrellas y cuchillos desbloqueados en la nube.
+          </p>
+          <input id="uName" placeholder="Usuario">
+          <input id="uPass" placeholder="Contraseña" type="password">
+          <div class="acct-btns">
+            <button id="btnLogin">Iniciar sesión</button>
+            <button id="btnRegister">Crear cuenta</button>
+            <button id="btnLogout" hidden>Cerrar sesión</button>
+          </div>
+          <p class="mut small" id="acctMsg"></p>
         </div>
-        <p class="mut small" id="acctMsg"></p>
+        <div id="starsPanel" class="side-panel">
+          <h2 id="starMapName">Mapa</h2>
+          <p class="mut small" id="starTimes" style="line-height: 1.5;"></p>
+        </div>
       </div>
       <div class="card">
         <h1>BHOP Go</h1>
@@ -667,7 +681,6 @@
         <p class="mut small" id="starTotals"></p>
         <h2>Mapa</h2>
         <div class="opts" id="maps"></div>
-        <p id="mdesc" class="mut small"></p>
         <p class="small" id="lastNote" style="color:var(--acc);font-weight:700"></p>
         <h2>Cuchillo</h2>
         <div class="opts" id="knives"></div>
@@ -675,6 +688,7 @@
         <h2>Opciones</h2>
         <label><input type="checkbox" id="auto" checked> Auto-bhop (mantener espacio)</label>
         <label><input type="checkbox" id="autoJump"> Auto-jump (saltar siempre)</label>
+        <label><input type="checkbox" id="showGhost"> Ver mejor tiempo (Fantasma)</label>
         <label>Sensibilidad <input type="range" id="sens" min="0.4" max="3" step="0.1" value="1"></label>
         <label>Volumen música <input type="range" id="vol" min="0" max="1" step="0.01" value="0.2"> <span
             id="volVal">20%</span> <button id="btnMute">Mutear</button></label>
@@ -796,7 +810,7 @@
             ['b', 150, 64, 64, 32], ['b', 160, 64, 64, 32, 35], ['b', 160, 64, 64, -32, -35], ['b', 170, 64, 64, -32], TR, ['b', 150, 64, 64, 32, 30], ['b', 160, 64, 64, -32, -30], E]
         }
       };
-      const sel = { m: 'e1', d: 'facil', a: true, aj: false, k: 'bay', r: 'legendario' };
+      const sel = { m: 'e1', d: 'facil', a: true, aj: false, k: 'bay', r: 'legendario', gh: false };
       const PK = 'bhop:prog'; let prog = { s: {} };
       try { prog = JSON.parse(localStorage.getItem(PK)) || prog } catch (e) { }
       if (!prog.s) prog.s = {};
@@ -831,6 +845,9 @@
       for (let i = 0; i < 300; i++) { g2.fillStyle = 'rgba(255,255,255,' + (.3 + Math.random() * .7) + ')'; g2.fillRect(Math.random() * 1024, Math.random() * 190, 1 + Math.random() * 1.5, 1 + Math.random() * 1.5) }
       const sg = g2.createRadialGradient(256, 235, 0, 256, 235, 70); sg.addColorStop(0, '#fff6d0'); sg.addColorStop(.25, '#ffd27a'); sg.addColorStop(1, 'rgba(255,180,90,0)'); g2.fillStyle = sg; g2.fillRect(150, 130, 220, 220);
       const sky = new THREE.Mesh(new THREE.SphereGeometry(4500, 32, 16), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc0), side: THREE.BackSide, fog: false, depthWrite: false })); sky.renderOrder = -1; S.add(sky);
+      const ghostMat = new THREE.MeshLambertMaterial({ color: 0x00ffff, transparent: true, opacity: 0.35 });
+      const ghostMesh = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 16), ghostMat);
+      ghostMesh.visible = false; S.add(ghostMesh);
       const C = new THREE.PerspectiveCamera(80, 1, 1, 6000); C.rotation.order = 'YXZ';
       S.add(new THREE.HemisphereLight(0xbcd4ff, 0x222233, .9));
       const dl = new THREE.DirectionalLight(0xffffff, .8); dl.position.set(200, 600, 300); S.add(dl);
@@ -845,7 +862,7 @@
         h.add(bx(2.4, 2, 2.8, gl, 0, 0, .2));
         for (let i = 0; i < 4; i++)h.add(bx(.62, .7, 1.6, gl, -.93 + i * .62, -.75, -1.4));
         h.add(bx(.8, .7, 2, gl, 1.35, .2, -.6));
-        g.add(h); g.h = h; return g
+        g.add(h); g.h = h; g.scale.setScalar(0.7); return g
       }
       const KN = {
         bay: { n: 'Bayoneta', c: 0xd7dde5, hc: 0x141414, gc: 0x8a8f96, gw: 1.5, p: [[0, -.5], [3.6, -.55], [5.4, -.05], [4.3, .25], [0, .5]] },
@@ -856,6 +873,13 @@
         cza: { n: 'Caza', c: 0xbfc7cf, hc: 0x5a3b22, gc: 0x9a6b3a, gw: 2, p: [[0, -.6], [4, -.65], [5.4, -.05], [5.6, .25], [0, .6]] },
         dag: { n: 'Daga', u: 'facil', fx: 0xffc94d, c: 0xf1e3a8, hc: 0x5b1c1c, gc: 0xd4af37, gw: 2.3, p: [[0, -.5], [2.8, -.55], [5.6, 0], [2.8, .55], [0, .5]] },
         pla: { n: 'Cristal', u: 'avanzado', fx: 0x39e6ff, c: 0x7fefff, hc: 0x0f2a33, gc: 0x1fb6c9, gw: 1.8, p: [[0, -.6], [2.2, -.95], [5.2, -.15], [5.9, .25], [2.2, .95], [0, .6]] }
+      };
+      const INSP_AX = {
+        bay: { x: 0, y: 1, z: 0 }, // giro clásico, tipo ventilador
+        cza: { x: 1, y: 0, z: 0 }, // voltereta hacia adelante
+        dag: { x: 0, y: 0, z: 1 }, // gira sobre su propio filo
+        kar: { x: 0, y: 0, z: 1 }, // desde el aro, combinando X y Z
+        pla: { x: 1, y: 1, z: 0 }  // giro diagonal
       };
       function mkKnife(k) {
         const d = KN[k]; let c = d.c, hc = d.hc, gc = d.gc, fx = d.fx;
@@ -880,14 +904,33 @@
           };
         }
         if (d.ring) { const r = new THREE.Mesh(new THREE.TorusGeometry(.65, .16, 6, 14), mt(gc, 60)); r.rotation.y = Math.PI / 2; r.position.set(0, .1, 1.3); g.add(r) }
-        g.rotation.set(0, d.ky || 0, d.kz === undefined ? .9 : d.kz); g.scale.setScalar(d.s || .75); return g
+        g.rotation.set(0, d.ky || 0, d.kz === undefined ? .9 : d.kz); g.scale.setScalar(d.s || .75);
+        if (d.ring) {
+          const ringRel = new THREE.Vector3(0, .1, 1.3).applyEuler(g.rotation).multiplyScalar(g.scale.x);
+          const pivot = new THREE.Group();
+          pivot.position.copy(ringRel);
+          g.position.copy(ringRel).negate();
+          pivot.add(g);
+          if (g.userData.tick) pivot.userData.tick = g.userData.tick;
+          return pivot;
+        }
+        return g
       }
       const RG = arm(), LG = arm(); let KG = null, RB, PB;
       function setKnife() { if (KG) RG.h.remove(KG); KG = mkKnife(sel.k); KG.userData.baseRot = KG.rotation.clone(); KG.userData.basePos = KG.position.clone(); RG.h.add(KG); const d = KN[sel.k]; RG.h.rotation.x = d.h === undefined ? 1.15 : d.h; RB = d.rb || [.25, .1, .2]; PB = d.pp || [3.7, -4.2, -8.5] }
       setKnife();
       RG.rotation.set(.25, .1, .2); LG.rotation.set(.4, -.25, .05); VS.add(RG, LG);
       let bt = 0, slash = 0, insp = 0;
-      function tryInspect() { if (state === 'play' && slash === 0) insp = 1e-4 }
+      function tryInspect() {
+        if (state === 'play' && slash === 0) {
+          if (insp > 0) {
+            insp = 0;
+            if (KG) { KG.position.copy(KG.userData.basePos); KG.rotation.copy(KG.userData.baseRot); }
+          } else {
+            insp = 1e-4;
+          }
+        }
+      }
       function updVM(dt) {
         if (KG && KG.userData.tick) KG.userData.tick(performance.now() / 1000);
         const k = Math.min(Math.hypot(P.vx, P.vz) * (P.g ? 1 : 0) / 250, 1.3); bt += dt * (2 + k * 8);
@@ -905,15 +948,23 @@
         if (KG) {
           const bR = KG.userData.baseRot, bP = KG.userData.basePos;
           if (insp > 0) {
-            const legend = prog.r[sel.k] === 'legendario', dur = legend ? 3.3 : 2.1;
-            insp += dt; const t = insp / dur;
-            if (t >= 1) { insp = 0; KG.position.copy(bP); KG.rotation.copy(bR) }
-            else {
-              const bring = e(Math.min(1, t / 0.2)), ret = e(Math.max(0, (t - 0.8) / 0.2)), bx0 = (1 - ret) * bring;
-              const spins = legend ? 2 : 1, ang = Math.min(1, Math.max(0, (t - 0.12) / 0.72)) * Math.PI * 2 * spins;
-              const flip = sel.k === 'kar' ? Math.sin(Math.min(1, Math.max(0, (t - .18) / .6)) * Math.PI) * Math.PI * (legend ? 2 : 1) : 0;
-              KG.position.set(bP.x, bP.y + 1.15 * bx0, bP.z - 1.5 * bx0);
-              KG.rotation.set(bR.x, bR.y + ang, bR.z + flip);
+            const legend = (role === 'admin' ? sel.r : (prog.r[sel.k] || 'raro')) === 'legendario';
+            if (legend) {
+              insp += dt;
+              const ang = Math.max(0, insp - 0.12) * Math.PI * 2 * 1.7;
+              KG.position.copy(bP);
+              const ax = INSP_AX[sel.k] || { x: 0, y: 1, z: 0 };
+              KG.rotation.set(bR.x + ang * ax.x, bR.y + ang * ax.y, bR.z + ang * ax.z);
+            } else {
+              const dur = 0.6;
+              insp += dt; const t = insp / dur;
+              if (t >= 1) { insp = 0; KG.position.copy(bP); KG.rotation.copy(bR) }
+              else {
+                const ang = Math.min(1, Math.max(0, (t - 0.12) / 0.72)) * Math.PI * 2;
+                KG.position.copy(bP);
+                const ax = INSP_AX[sel.k] || { x: 0, y: 1, z: 0 };
+                KG.rotation.set(bR.x + ang * ax.x, bR.y + ang * ax.y, bR.z + ang * ax.z);
+              }
             }
           } else { KG.position.copy(bP); KG.rotation.copy(bR) }
         }
@@ -923,7 +974,8 @@
       addEventListener('resize', resize); resize();
       // --- Estado
       let H = 72, vo = 0, eh = 64; const HW = 16, TICK = 1 / 128, COL = { start: 0x3b82f6, bhop: 0xf59e0b, check: 0x22c55e, end: 0xeab308, solid: 0x94a3b8, wall: 0x475569 };
-      let parT = 1, blocks = [], P, cp, state = 'menu', running, done, time, falls, jumps, cps, total, yaw = 0, pitch = 0, jq = 0, drag = false, down = false;
+      let parT = 1, blocks = [], P, prevP, cp, state = 'menu', running, done, time, falls, jumps, cps, total, yaw = 0, pitch = 0, jq = 0, drag = false, down = false;
+      let ghostData = [], ghostRec = [], ghostTicks = 0, globalGhostData = null;
       const K = {};
       function build() {
         blocks.forEach(b => { S.remove(b.m); b.m.geometry.dispose() }); blocks = [];
@@ -934,12 +986,19 @@
           blocks.push({ t: o.t, m, py: o.y - h / 2, x0: o.x - o.w / 2, x1: o.x + o.w / 2, z0: o.z - o.d / 2, z1: o.z + o.d / 2, y1: o.y, y0: o.y - h, cx: o.x, cz: o.z, s: 'idle', tm: 0, solid: true, hit: false });
         });
         total = blocks.filter(b => b.t === 'check').length;
-        P = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, g: false, d: false }; H = 72; vo = 0; cp = { x: 0, y: 0, z: 0 };
+        if (globalGhostData) {
+          ghostData = globalGhostData;
+        } else {
+          try { const gd = localStorage.getItem(key() + ':ghost'); ghostData = gd ? JSON.parse(gd) : [] } catch (e) { ghostData = [] }
+        }
+        ghostRec = []; ghostTicks = 0;
+        P = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, g: false, d: false }; prevP = { x: 0, y: 0, z: 0 }; H = 72; vo = 0; cp = { x: 0, y: 0, z: 0 };
         running = false; done = false; time = 0; falls = 0; jumps = 0; cps = 0; yaw = 0; pitch = 0;
       }
       function overlap(b) { return b.solid && P.x + HW > b.x0 && P.x - HW < b.x1 && P.z + HW > b.z0 && P.z - HW < b.z1 && P.y + H > b.y0 && P.y < b.y1 }
-      function respawn() { P.x = cp.x; P.y = cp.y; P.z = cp.z; P.vx = P.vy = P.vz = 0; P.g = false }
+      function respawn() { P.x = cp.x; P.y = cp.y; P.z = cp.z; P.vx = P.vy = P.vz = 0; P.g = false; prevP.x = cp.x; prevP.y = cp.y; prevP.z = cp.z; }
       function tick(dt) {
+        prevP.x = P.x; prevP.y = P.y; prevP.z = P.z;
         const cw = K.ShiftLeft || K.KeyC;
         const hit = (h, y) => { const oh = H, oy = P.y; H = h; P.y = y; const r = blocks.some(overlap); H = oh; P.y = oy; return r };
         if (cw && !P.d) { P.d = true; if (!P.g && !hit(54, P.y + 18)) { P.y += 18; vo -= 18 } H = 54 }
@@ -971,7 +1030,10 @@
           if (st2.t === 'end' && !done) finish();
         }
         if (P.y < cp.y - 350) { falls++; respawn() }
-        if (running && !done) time += dt;
+        if (running && !done) {
+          time += dt;
+          if (ghostTicks++ % 4 === 0) ghostRec.push([Math.round(P.x), Math.round(P.y), Math.round(P.z)]);
+        }
         jq = Math.max(0, jq - 1);
       }
       // --- Cuenta y sincronización (Variables iniciales)
@@ -985,7 +1047,13 @@
       const getBest = () => { try { return parseFloat(localStorage.getItem(key())) || null } catch (e) { return null } };
       function info() {
         const b = getBest(), pr = par(sel.m), df = MAPS[sel.m].df, o = ord(df), last = o.indexOf(sel.m) === o.length - 1;
-        $('mdesc').textContent = MAPS[sel.m].d + ' Estrellas: 5★ ≤ ' + fmt(pr) + ' · 4★ ≤ ' + fmt(pr * 1.2) + ' · 3★ ≤ ' + fmt(pr * 1.45) + ' · 2★ ≤ ' + fmt(pr * 1.8) + '.' + (last ? ' Requiere 16★ en ' + DIFF[df].n + ' para jugarlo. Al superarlo se abre una caja con un cuchillo nuevo.' : '');
+        $('starMapName').textContent = MAPS[sel.m].n;
+        $('starTimes').innerHTML =
+          '5★ ≤ ' + fmt(pr) + '<br>' +
+          '4★ ≤ ' + fmt(pr * 1.2) + '<br>' +
+          '3★ ≤ ' + fmt(pr * 1.45) + '<br>' +
+          '2★ ≤ ' + fmt(pr * 1.8) +
+          (last ? '<br><br>Requiere 16★ en ' + DIFF[df].n + ' para jugarlo. Al superarlo se abre una caja con un cuchillo nuevo.' : '');
         $('best').textContent = b ? 'Mejor tiempo: ' + fmt(b) : 'Sin récord en este mapa.';
       }
       const ord = df => Object.keys(MAPS).filter(k => MAPS[k].df === df);
@@ -1059,8 +1127,8 @@
         state = 'finish';
         if (document.pointerLockElement) document.exitPointerLock();
         const b = getBest(), st = starsOf(time), df = MAPS[sel.m].df, o = ord(df), i = o.indexOf(sel.m), was = prog.s[sel.m] || 0, before = o.map(unl), isRec = !b || time < b;
-        if (isRec) { try { localStorage.setItem(key(), time) } catch (e) { } }
-        if (authToken) submitScore(sel.m, time);
+        if (isRec) { try { localStorage.setItem(key(), time); localStorage.setItem(key() + ':ghost', JSON.stringify(ghostRec)); if (!globalGhostData) ghostData = ghostRec.slice(); } catch (e) { } }
+        if (authToken) submitScore(sel.m, time, ghostRec);
         prog.s[sel.m] = Math.max(was, st); save();
         const nw = o.filter((k, j) => !before[j] && unl(k)).map(k => MAPS[k].n), nk = Object.keys(KN).find(kk => KN[kk].u === df);
         let extra = 'Caídas ' + falls + ' · Saltos ' + jumps;
@@ -1076,6 +1144,7 @@
       function lock() { try { cv.requestPointerLock() } catch (e) { } setTimeout(() => { if (!document.pointerLockElement && state === 'play') drag = true }, 400) }
       $('auto').onchange = e => sel.a = e.target.checked;
       $('autoJump').onchange = e => sel.aj = e.target.checked;
+      $('showGhost').onchange = e => sel.gh = e.target.checked;
       $('play').onclick = () => {
         build(); closeMenu(); lock();
         if (bgm.paused && bgm.src) bgm.play().catch(() => { });
@@ -1084,7 +1153,13 @@
       ui(); build();
       document.addEventListener('pointerlockchange', () => { if (document.pointerLockElement === cv) drag = false; else if (state === 'play' && !drag) pause() });
       cv.addEventListener('click', () => { if (state === 'play' && !document.pointerLockElement) lock() });
-      addEventListener('mousedown', e => { down = true; if (e.button === 0 && state === 'play' && slash === 0 && insp === 0) slash = .001 }); addEventListener('mouseup', () => down = false);
+      addEventListener('mousedown', e => {
+        down = true;
+        if (e.button === 0 && state === 'play' && slash === 0) {
+          if (insp > 0) { insp = 0; if (KG) { KG.position.copy(KG.userData.basePos); KG.rotation.copy(KG.userData.baseRot); } }
+          slash = .001;
+        }
+      }); addEventListener('mouseup', () => down = false);
       addEventListener('mousemove', e => {
         if (state !== 'play' || !(document.pointerLockElement === cv || (drag && down))) return;
         const s = .0022 * parseFloat($('sens').value); yaw -= e.movementX * s; pitch = Math.max(-1.55, Math.min(1.55, pitch - e.movementY * s));
@@ -1098,15 +1173,21 @@
         if (state === 'play' && (e.shiftKey || ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code))) e.preventDefault();
         if (!K[e.code] && e.code === 'Space') jq = 3;
         K[e.code] = true;
+        if (e.code === 'Escape' && state === 'play') {
+          pause();
+        }
         if (state !== 'play') return;
-        if (e.code === 'Escape') pause();
         if (e.code === 'KeyR' && !e.repeat) build();
         if (e.code === 'KeyF' && !e.repeat) tryInspect();
         if (e.code === 'KeyQ' && !e.repeat) { const ks = Object.keys(KN).filter(kOK); sel.k = ks[(ks.indexOf(sel.k) + 1) % ks.length]; setKnife() }
       });
-      addEventListener('keyup', e => K[e.code] = false); addEventListener('blur', () => { for (const k in K) K[k] = false });
+      addEventListener('keyup', e => {
+        K[e.code] = false;
+        if (e.code === 'Escape' && state === 'menu' && !$('resume').hidden) { closeMenu(); lock(); }
+      });
+      addEventListener('blur', () => { for (const k in K) K[k] = false });
       // --- Interfaz de Cuenta
-      function acctMsg(t) { $('acctMsg').textContent = t || '' }
+      function acctMsg(t) { $('acctMsg').innerHTML = t || '' }
       function setLogged(name) {
         $('btnLogin').hidden = !!name; $('btnRegister').hidden = !!name; $('uName').hidden = !!name; $('uPass').hidden = !!name;
         $('btnLogout').hidden = !name;
@@ -1150,8 +1231,12 @@
           const d = await api('leaderboard?map=' + sel.m, { method: 'GET' });
           if (!d.entries || d.entries.length === 0) {
             $('lbBody').innerHTML = '<p class="mut small">Sin tiempos aún.</p>';
+            globalGhostData = null;
             return;
           }
+          if (d.entries[0] && d.entries[0].ghost_data) {
+            try { globalGhostData = JSON.parse(d.entries[0].ghost_data); } catch(e){ globalGhostData = null; }
+          } else { globalGhostData = null; }
           let html = '<table><tr><th>#</th><th>Jugador</th><th>Tiempo</th><th>Fecha</th></tr>';
           d.entries.forEach((e, i) => {
             const date = new Date(e.created_at).toLocaleDateString();
@@ -1163,11 +1248,11 @@
           $('lbBody').innerHTML = '<p class="mut small">Error al cargar.</p>';
         }
       }
-      function submitScore(map, t) {
-        api('leaderboard', { method: 'POST', body: JSON.stringify({ map, time: t }) }).catch(() => { });
+      function submitScore(map, t, ghostRec) {
+        api('leaderboard', { method: 'POST', body: JSON.stringify({ map, time: t, ghost: JSON.stringify(ghostRec) }) }).catch(() => { });
       }
       // --- Música
-      const SONGS = ['Disco Night.mp3', 'Midnight.mp3', 'Summertime.mp3', 'At Evening.mp3'];
+      const SONGS = ['Disco_Night.mp3', 'Midnight.mp3', 'Summertime.mp3', 'At_Evening.mp3'];
       let curSongIdx = 0;
       let isLoop = false;
       let isMuted = false;
@@ -1178,7 +1263,8 @@
         curSongIdx = idx;
         bgm.src = 'music/' + SONGS[idx];
         $('songSelect').value = idx;
-        $('nowPlaying').textContent = '\u266b  ' + SONGS[idx].replace('.mp3', '') + '  \u266b  ' + SONGS[idx].replace('.mp3', '') + '  ';
+        const dispName = SONGS[idx].replace('.mp3', '').replace(/_/g, ' ');
+        $('nowPlaying').textContent = '\u266b  ' + dispName + '  \u266b  ' + dispName + '  ';
       }
 
       bgm.addEventListener('ended', () => {
@@ -1224,7 +1310,23 @@
         requestAnimationFrame(frame);
         const dt = Math.min((now - last) / 1000, .1); last = now;
         if (state === 'play') { acc += dt; while (acc >= TICK) { tick(TICK); acc -= TICK } }
-        eh += ((P.d ? 46 : 64) - eh) * Math.min(1, dt * 20); vo -= vo * Math.min(1, dt * 14); C.position.set(P.x, P.y + eh + vo, P.z); sky.position.copy(C.position); C.rotation.set(pitch, yaw, 0); R.clear(); R.render(S, C); R.clearDepth(); updVM(dt); R.render(VS, VC);
+        const alpha = Math.max(0, Math.min(1, acc / TICK));
+        const cx = prevP.x + (P.x - prevP.x) * alpha;
+        const cy = prevP.y + (P.y - prevP.y) * alpha;
+        const cz = prevP.z + (P.z - prevP.z) * alpha;
+        eh += ((P.d ? 46 : 64) - eh) * Math.min(1, dt * 20); vo -= vo * Math.min(1, dt * 14); 
+        C.position.set(cx, cy + eh + vo, cz); sky.position.copy(C.position); 
+        if (state === 'play' && sel.gh && ghostData.length > 0) {
+          ghostMesh.visible = true;
+          const t = time / (4 / 128), idx = Math.floor(t), frac = t - idx;
+          if (idx < ghostData.length - 1) {
+            const p0 = ghostData[idx], p1 = ghostData[idx + 1];
+            ghostMesh.position.set(p0[0] + (p1[0] - p0[0]) * frac, p0[1] + (p1[1] - p0[1]) * frac, p0[2] + (p1[2] - p0[2]) * frac);
+          } else if (idx < ghostData.length) {
+            ghostMesh.position.set(ghostData[idx][0], ghostData[idx][1], ghostData[idx][2]);
+          } else { ghostMesh.visible = false; }
+        } else { ghostMesh.visible = false; }
+        C.rotation.set(pitch, yaw, 0); R.clear(); R.render(S, C); R.clearDepth(); updVM(dt); R.render(VS, VC);
         $('hud').innerHTML = '<b>' + Math.round(Math.hypot(P.vx, P.vz)) + '</b> u/s<br>' + fmt(time) + ' <span class="star">' + '★'.repeat(starsOf(time)) + '</span><br>Checkpoints ' + cps + '/' + total + ' · Caídas ' + falls + ' · Saltos ' + jumps + (drag && state === 'play' ? '<br>Arrastra el mouse para mirar' : '');
       }
       requestAnimationFrame(frame);

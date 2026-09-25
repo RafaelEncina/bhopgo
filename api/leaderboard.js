@@ -12,22 +12,37 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') {
     const map = req.query.map;
     if (!map) return res.status(400).json({ error: 'Falta el mapa' });
-    const { rows } = await sql`
-      SELECT l.username, l.time_seconds, l.created_at
-      FROM leaderboard l
-      WHERE l.map_id = ${map}
-      ORDER BY l.time_seconds ASC
-      LIMIT 10`;
-    return res.status(200).json({ entries: rows });
+    try {
+      const { rows } = await sql`
+        SELECT l.username, l.time_seconds, l.created_at, l.ghost_data
+        FROM leaderboard l
+        WHERE l.map_id = ${map}
+        ORDER BY l.time_seconds ASC
+        LIMIT 10`;
+      return res.status(200).json({ entries: rows });
+    } catch(e) {
+      const { rows } = await sql`
+        SELECT l.username, l.time_seconds, l.created_at
+        FROM leaderboard l
+        WHERE l.map_id = ${map}
+        ORDER BY l.time_seconds ASC
+        LIMIT 10`;
+      return res.status(200).json({ entries: rows });
+    }
   }
 
   if (req.method === 'POST') {
     const user = auth(req);
     if (!user) return res.status(401).json({ error: 'No autenticado' });
-    const { map, time } = req.body || {};
+    const { map, time, ghost } = req.body || {};
     if (!map || typeof time !== 'number' || time <= 0) {
       return res.status(400).json({ error: 'Datos inválidos' });
     }
+    
+    try {
+      await sql`ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS ghost_data TEXT`;
+    } catch(e) {}
+
     // Only insert if it's better than the user's existing time on this map
     const { rows: existing } = await sql`
       SELECT id, time_seconds FROM leaderboard
@@ -36,13 +51,13 @@ module.exports = async (req, res) => {
       if (time < existing[0].time_seconds) {
         await sql`
           UPDATE leaderboard
-          SET time_seconds = ${time}, username = ${user.username}, created_at = now()
+          SET time_seconds = ${time}, username = ${user.username}, created_at = now(), ghost_data = ${ghost || null}
           WHERE id = ${existing[0].id}`;
       }
     } else {
       await sql`
-        INSERT INTO leaderboard (user_id, map_id, username, time_seconds)
-        VALUES (${user.uid}, ${map}, ${user.username}, ${time})`;
+        INSERT INTO leaderboard (user_id, map_id, username, time_seconds, ghost_data)
+        VALUES (${user.uid}, ${map}, ${user.username}, ${time}, ${ghost || null})`;
     }
     return res.status(200).json({ ok: true });
   }
